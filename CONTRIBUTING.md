@@ -1,6 +1,12 @@
 # Contributing
 
-[AGENTS.md](AGENTS.md) holds the rules for adding and changing skills. This file covers the changelog and releases.
+This file covers adding and changing skills, the changelog, and releases.
+
+## Adding or changing a skill
+
+- Put each skill in its own folder, `skills/<name>/`, with a `SKILL.md` at its root. Name the folder after the `name` in the frontmatter of `SKILL.md`, in kebab-case.
+- List each skill folder in the `skills` array of `.claude-plugin/plugin.json`, as `./skills/<name>`, in the same change that adds, renames, or removes it.
+- Bump `version` in `.claude-plugin/plugin.json` in every change that ships to users, since installed copies update only when it changes. Follow semver: a major bump for a removed or renamed skill, a minor bump for a new skill, and a patch bump for a fix to an existing one. Add the version's section to `CHANGELOG.md` in the same change, as [Changelog](#changelog) describes.
 
 ## Changelog
 
