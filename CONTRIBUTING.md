@@ -4,11 +4,12 @@
 
 ## Changelog
 
-[CHANGELOG.md](CHANGELOG.md) follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Every change that bumps `version` in `.claude-plugin/plugin.json` adds a section for that version to the top of the changelog, in the same pull request:
+[CHANGELOG.md](CHANGELOG.md) follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Its first section is always an empty `## [Unreleased]`, which stays in place through every release. Every change that bumps `version` in `.claude-plugin/plugin.json` adds a section for that version right below it, in the same pull request:
 
 - Head the section `## [<version>] - <date>`, with the date the pull request merges in `YYYY-MM-DD` form.
 - Group the entries under `### Added`, `### Changed`, `### Deprecated`, `### Removed`, `### Fixed`, or `### Security`. Write each entry for someone who uses the skills.
-- Add a link reference for the version at the bottom of the file, above the older ones: `[<version>]: https://github.com/NoNamer777/skills/releases/tag/v<version>`.
+- Add a link reference for the version at the bottom of the file, below `[unreleased]` and above the older ones: `[<version>]: https://github.com/NoNamer777/skills/releases/tag/v<version>`.
+- Point the `[unreleased]` link reference at the new tag: `[unreleased]: https://github.com/NoNamer777/skills/compare/v<version>...HEAD`.
 
 Changes that leave the version alone, such as edits to this file, get no entry.
 
