@@ -33,6 +33,6 @@ Release each version once the pull request that bumps it merges. Installed plugi
 
 3. Publish a GitHub release for the tag on [the new release page](https://github.com/NoNamer777/skills/releases/new):
    1. Select the `v<version>` tag you pushed in step 2, so the release uses the signed tag.
-   2. Set the title to `v<version>`.
+   2. Set the title to `Release v<version>`.
    3. Paste the version's section from `CHANGELOG.md` into the description, without its `## [<version>]` heading.
    4. Click **Publish release**.
