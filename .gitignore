@@ -1,0 +1,5 @@
+.idea/*
+!.idea/markdown.xml
+
+.vscode/*
+!.vscode/extensions.json

@@ -1,0 +1,14 @@
+{
+    "name": "nonamer777-skills",
+    "version": "0.0.0",
+    "description": "Agent skills for Claude Code and other coding agents.",
+    "author": {
+        "name": "NoNamer777",
+        "url": "https://github.com/NoNamer777"
+    },
+    "homepage": "https://github.com/NoNamer777/skills",
+    "repository": "https://github.com/NoNamer777/skills",
+    "license": "MIT",
+    "keywords": ["skills"],
+    "skills": []
+}

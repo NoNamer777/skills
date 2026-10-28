@@ -1,0 +1,15 @@
+{
+    "name": "nonamer777",
+    "owner": {
+        "name": "NoNamer777",
+        "url": "https://github.com/NoNamer777"
+    },
+    "description": "NoNamer777's agent skills, as an installable Claude Code plugin.",
+    "plugins": [
+        {
+            "name": "nonamer777-skills",
+            "source": "./",
+            "description": "Agent skills for Claude Code and other coding agents."
+        }
+    ]
+}
