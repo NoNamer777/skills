@@ -37,8 +37,14 @@ Release each version once the pull request that bumps it merges. Installed plugi
    git push origin v<version>
    ```
 
-3. Publish a GitHub release for the tag on [the new release page](https://github.com/NoNamer777/skills/releases/new):
+3. Publish a GitHub release for the tag, either on [the new release page](https://github.com/NoNamer777/skills/releases/new):
    1. Select the `v<version>` tag you pushed in step 2, so the release uses the signed tag.
    2. Set the title to `Release v<version>`.
    3. Paste the version's section from `CHANGELOG.md` into the description, without its `## [<version>]` heading.
    4. Click **Publish release**.
+
+   Or with `gh`: save the version's section from `CHANGELOG.md`, without its heading, to a file outside the repository, and pass it as the notes. `--verify-tag` makes `gh` use the signed tag from step 2 and stop when it is missing, instead of creating an unsigned one:
+
+   ```bash
+   gh release create v<version> --verify-tag --title "Release v<version>" --notes-file <file>
+   ```
