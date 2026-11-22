@@ -6,11 +6,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-22
+
+### Added
+
+- `updating-pr-branch` skill: brings a GitHub pull request's head branch up to date by merging its freshly pulled base branch, resolving any conflicts, and pushing the merge.
+
 ## [0.1.0] - 2026-10-28
 
 ### Added
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.1.0...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/NoNamer777/skills/releases/tag/v0.2.0
 [0.1.0]: https://github.com/NoNamer777/skills/releases/tag/v0.1.0
