@@ -33,7 +33,7 @@ gh api repos/<owner>/<repo>/pulls/<number> --jq .author_association
 
 The second command reads `authorAssociation`, which `gh pr view` has no field for.
 
-Stop and say why when `state` is not `OPEN`. When the repository's instructions name a separate account for reviews, switch to it first, and switch back once the review is posted or the user decides to post nothing. Note whether `author.login` equals `gh api user --jq .login`, which reads the active account: the user may review their own pull request, which changes only how step 7 posts.
+Stop and say why when `state` is not `OPEN`. Reading and drafting use the user's own account. When the repository's instructions name a separate account for reviews, step 7 switches to it just before posting, and back right after. Note whether `author.login` equals the login that will post: the review account when one is named, else the result of `gh api user --jq .login`. The user may review their own pull request, which changes only how step 7 posts.
 
 ## 2. Get the code
 
@@ -147,7 +147,7 @@ Ask the user which comments to post and which verdict to use. They may approve a
 
 Skip this step for local changes.
 
-Check that the pull request's head still equals `headRefOid`; when it moved, say so and stop, since the drafted lines may no longer match. Otherwise submit the approved comments as one review, built in a file outside the repository so the body survives any shell's quoting:
+Check that the pull request's head still equals `headRefOid`; when it moved, say so and stop, since the drafted lines may no longer match. Otherwise switch to the review account when step 1 names one, and submit the approved comments as one review, built in a file outside the repository so the body survives any shell's quoting:
 
 ```bash
 gh api repos/<owner>/<repo>/pulls/<number>/reviews --input <file>
@@ -157,7 +157,7 @@ The file holds `commit_id` (`headRefOid`), `event`, `body`, and `comments`, each
 
 On the user's own pull request, GitHub rejects `APPROVE` and `REQUEST_CHANGES`, so submit `COMMENT` and say that the verdict stays advice.
 
-Done when the review is posted. Report its URL.
+Switch back to the user's account right after the post, whether it succeeded or not. Done when the review is posted and the user's account is active again. Report the review's URL.
 
 ## 8. Offer to clean up
 
