@@ -27,10 +27,13 @@ With no argument, the target is the local changes: staged, unstaged, and untrack
 Otherwise read `<owner>`, `<repo>`, and `<number>` from the argument: a number belongs to the current repository (`gh repo view --json owner,name`), and a URL or `<owner>/<repo>#<number>` names its own. Fetch the pull request:
 
 ```bash
-gh pr view <number> -R <owner>/<repo> --json author,authorAssociation,state,title,body,url,baseRefName,headRefName,headRefOid,isCrossRepository,closingIssuesReferences
+gh pr view <number> -R <owner>/<repo> --json author,state,title,body,url,baseRefName,headRefName,headRefOid,isCrossRepository,closingIssuesReferences
+gh api repos/<owner>/<repo>/pulls/<number> --jq .author_association
 ```
 
-Stop and say why when `state` is not `OPEN`. Note whether `author.login` equals `gh api user --jq .login`: the user may review their own pull request, which changes only how step 7 posts.
+The second command reads `authorAssociation`, which `gh pr view` has no field for.
+
+Stop and say why when `state` is not `OPEN`. When the repository's instructions name a separate account for reviews, switch to it first, and switch back once the review is posted or the user decides to post nothing. Note whether `author.login` equals `gh api user --jq .login`, which reads the active account: the user may review their own pull request, which changes only how step 7 posts.
 
 ## 2. Get the code
 
@@ -61,7 +64,7 @@ For a pull request, also read its description, the issues in `closingIssuesRefer
 
 Launch one sub agent per area below, together, each briefed with the description, the linked issues, the points already raised, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each reviewer to read every changed file for its area only. Launch an area marked "when" only where the diff touches it.
 
-The checks sub agent runs the pull request's code. When the head is in a fork (`isCrossRepository`) or `authorAssociation` is not `OWNER`, `MEMBER`, or `COLLABORATOR`, ask the user before launching it; when they decline, skip it and treat the checks as unassessed.
+The checks sub agent runs the pull request's code. When the head is in a fork (`isCrossRepository`) or the author association is not `OWNER`, `MEMBER`, or `COLLABORATOR`, ask the user before launching it; when they decline, skip it and treat the checks as unassessed.
 
 - **Checks:** run locally the checks CI would run. Read the CI definitions in the checkout (`.github/workflows` and any other CI configuration) and, for a pull request, its required checks from `gh pr checks <number>`. Run each step that can run locally in its check-only form, never a fixer, with the repository's pinned tooling: install when dependencies are missing, then lint, format check, type check, build, and tests. Skip a step that needs secrets, deploys, publishes, or targets another platform, and list each skip with its reason. When the diff affects a runnable app (a web app, a server, or a CLI), also start its dev app from the repository's own instructions, in the checkout and against local services only, and exercise what the diff changes: the changed screens, endpoints, or commands, and the behavior the description promises. Watch for console and server errors. When the app needs configuration the checkout lacks, such as an `.env`, report the test as skipped instead of copying or inventing secrets. Stop what you started. Return each check and app test as pass, fail, or skipped. For each failure return the command, the output that shows it, whether it points at files the diff changes, and the steps to reproduce it. Also return the files the run changed (`git status --porcelain`). It returns no findings.
 - **Scope and fit:** the change should exist, and the description and each linked issue match what the diff does. Report the goals it misses and the changes it does not declare. A large change (about 20 files, or several hundred hand-written changed lines), or one that mixes a refactor or reformatting with behavior, gets a note and a recommendation to split. Skim generated and lock files, and list every part skimmed.
