@@ -5,8 +5,16 @@ This file covers adding and changing skills, the changelog, and releases.
 ## Adding or changing a skill
 
 - Put each skill in its own folder, `skills/<name>/`, with a `SKILL.md` at its root. Name the folder after the `name` in the frontmatter of `SKILL.md`, in kebab-case.
-- List each skill folder in the `skills` array of `.claude-plugin/plugin.json`, as `./skills/<name>`, in the same change that adds, renames, or removes it.
+- List each skill folder in the `skills` array of `.claude-plugin/plugin.json`, as `./skills/<name>`, in the same change that adds, renames, or removes it, except for a skill you hold back as [unreleased](#unreleased-skills).
 - Bump `version` in `.claude-plugin/plugin.json` in every change that ships to users, since installed copies update only when it changes. Follow semver: a major bump for a removed or renamed skill, a minor bump for a new skill, and a patch bump for a fix to an existing one. Add the version's section to `CHANGELOG.md` in the same change, as [Changelog](#changelog) describes.
+
+## Unreleased skills
+
+Claude Code detects a plugin update by its `version`. While `version` stays the same, `claude plugin update` and auto-update leave an installed copy alone, even when `plugin.json` or a skill changed on `main`. A fresh install copies the current files, so it picks up a listed skill without any bump.
+
+A listing without a bump therefore reaches new users and never existing ones. To keep a skill unreleased, leave it out of `skills` in `plugin.json` and leave `version` and the changelog alone. Add the listing, the bump, and the changelog entry together in the change that releases it.
+
+`npx skills add` reads the `skills/` folder and ignores `plugin.json`, so a skill merged to `main` is installable that way, listed or not. Keep a skill that must stay hidden on its branch until its release.
 
 ## Changelog
 
