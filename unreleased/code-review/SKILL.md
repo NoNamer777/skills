@@ -50,34 +50,52 @@ For a pull request, also read its description, the issues in `closingIssuesRefer
 
 ## 4. Review
 
-Read every changed file. For each, check the change against:
+Review top-down, and read every changed file.
 
-- **Correctness:** logic errors, unhandled cases, broken callers.
-- **Intent:** what the description and linked issues ask for.
-- **Standards:** the repository's agent instructions, contributing docs, and lint configuration.
-- **Tests:** coverage of the behavior the change adds or alters.
+1. **Scope and fit.** Decide whether the change should exist. Compare the description and each linked issue with what the diff does, and report the goals it misses and the changes it does not declare. Check size and focus: a large change (about 20 files, or several hundred hand-written changed lines) or one that mixes a refactor or reformatting with behavior gets a note first in the summary and a recommendation to split. Skim generated and lock files, and record every part you only skimmed.
+2. **Design.** Read the files that hold the logic first, then the rest. Report a major design problem as soon as you find it, before reading on.
+3. **Dimensions.** Check each changed file against these, applying a dimension marked "when" only where the diff touches it:
+   - **Functionality:** edge cases, error handling, and concurrency when shared state or async code changes.
+   - **Security,** when the diff touches input handling, authentication, authorization, cryptography, secrets, serialization, or file, process, or query construction: review the change for security. Trace data from its sources to its sinks across each changed trust boundary, and check the impact on existing controls, new attack vectors, new integrations, and regressions. When unsure about authentication, authorization, cryptography, or secrets, raise a blocking Question and recommend a human reviewer for that part.
+   - **Tests:** new or changed logic has tests that would fail if the code broke. Read the tests as code: meaningful assertions, no false positives.
+   - **Complexity:** nothing more generic or elaborate than the problem needs.
+   - **Compatibility,** when the diff changes a public surface (exported API, CLI flags, config keys, file or wire formats, database schema, skill names and arguments): the break is declared and comes with a deprecation or migration path.
+   - **Dependencies,** when a manifest or lockfile changes: necessity, maintenance state, license, known vulnerabilities, lockfile consistency.
+   - **Performance:** only concrete risks visible in the diff, such as an unbounded query or repeated work in a loop.
+   - **Documentation:** updated when user-facing behavior, the build, or the release changes.
+   - **Naming and comments** (why, not what), and consistency with the surrounding code and the repository's rules.
+4. **Automation.** For a pull request, read the CI status (`gh pr checks`) and the repository's lint configuration. Leave out what a formatter or linter enforces, and report a failing required check once, in the summary.
 
 Sort each finding into one level:
 
-| Level      | When                                        |
-|:-----------|:--------------------------------------------|
-| Blocking   | The change is wrong or breaks something     |
-| Suggestion | The change works and could be better        |
-| Question   | The intent or a choice is unclear           |
+| Level      | When                                                                                        |
+|:-----------|:--------------------------------------------------------------------------------------------|
+| Blocking   | Merging makes things worse: see below                                                       |
+| Suggestion | The change works and could be better; the author may decline                                |
+| Question   | The intent or a choice is unclear; blocking when its answer could reveal a Blocking finding |
+| Nit        | Taste, or a point no rule covers; never gates a verdict                                     |
 
-Done when every changed file is read and every finding carries a level and a `path:line`.
+A finding is Blocking when merging leaves the codebase or its users worse off than not merging: incorrect or unhandled behavior, a regression, a vulnerability, an undeclared break of a public surface, new logic without meaningful tests, complexity or duplication the change adds, or a description or linked issue the change misses or contradicts. A problem that predates the change is a Suggestion with a follow-up issue.
+
+Done when every changed file is read, every finding carries a level and a `path:line`, and you can list what you skimmed or did not run.
 
 ## 5. Present the review
 
 Recommend one verdict for a pull request:
 
 - **Request changes** when any finding is Blocking.
-- **Approve** when there are no findings, or only Suggestions the author can take or leave.
-- **Comment** otherwise, for example when only Questions remain.
+- **Approve** when nothing is Blocking, you reviewed all of the change, and it clearly improves the code even if imperfect. Suggestions and Nits ride along with an approval.
+- **Comment** otherwise: a blocking Question is open, or you cannot vouch for the change because part of it is skimmed or unassessed, a required check is failing, or a security-sensitive part is beyond your confidence. Say what is missing.
 
-Give the verdict with one line of reasoning, then the draft review: a summary body of a few sentences at most, and the inline comments, each with its `path:line`, its level, and its text. Anchor a comment inline whenever its line is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
+Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most: the size note if there is one, what you skimmed, did not run, or did not assess, a failing check if there is one, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
 
-Write each comment so the author can act on it at a glance: name the problem and the change you ask for in a sentence or two, add the reason only when the author cannot infer it, and point at code by its line instead of quoting it. Put a small, concrete fix in a GitHub `suggestion` block.
+Write each comment so the author can act on it at a glance:
+
+- Open with its label: `issue (blocking):`, `suggestion:`, `question (blocking):` or `question (non-blocking):`, or `nitpick:`.
+- Cover one finding per comment. Name the problem and the change you ask for in a sentence or two, and pair an `issue` with a fix or direction when you know one. When you are unsure there is a problem, ask a `question`.
+- Speak about the code, not the author, and name the concrete drawback. Add the reason only when the author cannot infer it.
+- Point at code by its line instead of quoting it, and put a small, concrete fix in a GitHub `suggestion` block.
+- List Blocking comments first. Leave Nits out when anything is Blocking, and keep them few otherwise.
 
 For local changes, present the findings by `path:line` and level, with no verdict or draft; there is nothing to post.
 
@@ -93,7 +111,7 @@ Check that the pull request's head still equals `headRefOid`; when it moved, say
 gh api repos/<owner>/<repo>/pulls/<number>/reviews --input <file>
 ```
 
-The file holds `commit_id` (`headRefOid`), `event`, `body`, and `comments`, each comment with `path`, `line`, `side`, and `body`, plus `start_line` and `start_side` for a range. `event` is `APPROVE`, `REQUEST_CHANGES`, or `COMMENT`.
+The file holds `commit_id` (`headRefOid`), `event`, `body`, and `comments`, each comment with `path`, `line`, `side`, and `body`, plus `start_line` and `start_side` for a range. The label opens each `body`, since GitHub has no severity field. `event` is `APPROVE`, `REQUEST_CHANGES`, or `COMMENT`.
 
 On the user's own pull request, GitHub rejects `APPROVE` and `REQUEST_CHANGES`, so submit `COMMENT` and say that the verdict stays advice.
 
