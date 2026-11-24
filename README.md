@@ -21,11 +21,12 @@ Pick one per agent, because installing both loads every skill twice.
 
 ## Layout
 
-| Path                              | Purpose                                         |
-|:----------------------------------|:------------------------------------------------|
-| `skills/<name>/SKILL.md`          | One skill: its trigger and its instructions     |
-| `.claude-plugin/plugin.json`      | Claude Code plugin manifest                     |
-| `.claude-plugin/marketplace.json` | Marketplace that lists the plugin for `claude`  |
+| Path                              | Purpose                                                  |
+|:----------------------------------|:---------------------------------------------------------|
+| `skills/<name>/SKILL.md`          | One skill: its trigger and its instructions              |
+| `unreleased/<name>/SKILL.md`      | A skill held back from release, which no install reaches |
+| `.claude-plugin/plugin.json`      | Claude Code plugin manifest                              |
+| `.claude-plugin/marketplace.json` | Marketplace that lists the plugin for `claude`           |
 
 `plugin.json` lists every skill and carries the plugin's version. Installed copies stay on that version until it changes.
 
