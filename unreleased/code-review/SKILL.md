@@ -112,6 +112,7 @@ Settle each finding:
 - It stays Blocking only when all three voters confirm and the median is Blocking; with two confirmations it becomes a Suggestion.
 - When voters disagree on a fact that one command settles, such as what a file contains or how earlier changes landed, run the command and settle by the fact.
 - A finding that survives on estimates alone, where a measurement was possible, stays and is marked unverified for step 6, with the measurement that would settle it.
+- When every voter refutes the claim as worded but confirms a narrower fact (the overflow exists only at enlarged text, say), drop the claim and carry the narrower fact to step 6 as an unvoted Suggestion, marked as measured by the voters.
 
 Keep each dropped finding's claim and `path:line` for step 6. Done when every voted finding has three votes and an outcome.
 
