@@ -15,10 +15,10 @@ The rules below are defaults. Where the repository's own agent instructions (`AG
 
 Sub agents do the review itself, in steps 4 and 5. The main agent does every other step, orchestrates the sub agents, and holds every exchange with the user. A sub agent knows only its brief, so give it the target, the checkout path, the command that prints the diff, and the exact shape of what it returns.
 
-- Step 4 runs one sub agent per review area.
+- Step 4 runs one sub agent per review area, and one that runs the checks.
 - Step 5 runs three sub agents per finding.
 
-No sub agent edits code, posts, or creates or removes anything. Announce each batch before launching it: how many sub agents, and for what. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed.
+No sub agent edits source files, posts, or removes anything. The checks sub agent may write build output and start a dev app, and stops what it started. Announce each batch before launching it: how many sub agents, and for what. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed.
 
 ## 1. Resolve the target
 
@@ -27,7 +27,7 @@ With no argument, the target is the local changes: staged, unstaged, and untrack
 Otherwise read `<owner>`, `<repo>`, and `<number>` from the argument: a number belongs to the current repository (`gh repo view --json owner,name`), and a URL or `<owner>/<repo>#<number>` names its own. Fetch the pull request:
 
 ```bash
-gh pr view <number> -R <owner>/<repo> --json author,state,title,body,url,baseRefName,headRefName,headRefOid,closingIssuesReferences
+gh pr view <number> -R <owner>/<repo> --json author,authorAssociation,state,title,body,url,baseRefName,headRefName,headRefOid,isCrossRepository,closingIssuesReferences
 ```
 
 Stop and say why when `state` is not `OPEN`. Note whether `author.login` equals `gh api user --jq .login`: the user may review their own pull request, which changes only how step 7 posts.
@@ -59,9 +59,11 @@ For a pull request, also read its description, the issues in `closingIssuesRefer
 
 ## 4. Review
 
-Launch one sub agent per review area below. Run the automation sub agent first, and launch the rest together, each briefed with the description, the linked issues, the points already raised, the automation report, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each to read every changed file for its area only. Launch an area marked "when" only where the diff touches it.
+Launch one sub agent per area below, together, each briefed with the description, the linked issues, the points already raised, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each reviewer to read every changed file for its area only. Launch an area marked "when" only where the diff touches it.
 
-- **Automation,** for a pull request: read the CI status (`gh pr checks`) and the repository's lint and formatter configuration. Return the failing required checks and the rules a formatter or linter already enforces; it returns no findings.
+The checks sub agent runs the pull request's code. When the head is in a fork (`isCrossRepository`) or `authorAssociation` is not `OWNER`, `MEMBER`, or `COLLABORATOR`, ask the user before launching it; when they decline, skip it and treat the checks as unassessed.
+
+- **Checks:** run locally the checks CI would run. Read the CI definitions in the checkout (`.github/workflows` and any other CI configuration) and, for a pull request, its required checks from `gh pr checks <number>`. Run each step that can run locally in its check-only form, never a fixer, with the repository's pinned tooling: install when dependencies are missing, then lint, format check, type check, build, and tests. Skip a step that needs secrets, deploys, publishes, or targets another platform, and list each skip with its reason. When the diff affects a runnable app (a web app, a server, or a CLI), also start its dev app from the repository's own instructions, in the checkout and against local services only, and exercise what the diff changes: the changed screens, endpoints, or commands, and the behavior the description promises. Watch for console and server errors. When the app needs configuration the checkout lacks, such as an `.env`, report the test as skipped instead of copying or inventing secrets. Stop what you started. Return each check and app test as pass, fail, or skipped. For each failure return the command, the output that shows it, whether it points at files the diff changes, and the steps to reproduce it. Also return the files the run changed (`git status --porcelain`). It returns no findings.
 - **Scope and fit:** the change should exist, and the description and each linked issue match what the diff does. Report the goals it misses and the changes it does not declare. A large change (about 20 files, or several hundred hand-written changed lines), or one that mixes a refactor or reformatting with behavior, gets a note and a recommendation to split. Skim generated and lock files, and list every part skimmed.
 - **Design:** read the files that hold the logic first, then the rest, and judge how the pieces fit the codebase.
 - **Functionality:** edge cases, error handling, and concurrency when shared state or async code changes.
@@ -74,7 +76,7 @@ Launch one sub agent per review area below. Run the automation sub agent first, 
 - **Documentation:** updated when user-facing behavior, the build, or the release changes.
 - **Naming and comments** (why, not what), and consistency with the surrounding code and the repository's rules.
 
-Each other sub agent returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. It leaves out what a formatter or linter enforces.
+Each reviewer returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. It leaves out what a formatter or linter enforces.
 
 | Level      | When                                                                                        |
 |:-----------|:--------------------------------------------------------------------------------------------|
@@ -85,7 +87,7 @@ Each other sub agent returns its findings, or none. A finding has a `path:line`,
 
 A finding is Blocking when merging leaves the codebase or its users worse off than not merging: incorrect or unhandled behavior, a regression, a vulnerability, an undeclared break of a public surface, new logic without meaningful tests, complexity or duplication the change adds, or a description or linked issue the change misses or contradicts. A problem that predates the change is a Suggestion with a follow-up issue.
 
-Merge findings from different dimensions that claim the same problem at the same place. Done when every sub agent has returned or been reported as unassessed, and you hold the merged findings, the automation report, and the list of what was skimmed, did not run, or did not assess. A failing required check goes to the summary and is not voted on.
+Merge findings from different areas that claim the same problem at the same place. A check or app test that fails at files the diff changes becomes a Blocking finding with its reproduction, and skips the vote; every other failure and every skip goes to the summary and prevents Approve. Done when every sub agent has returned or been reported as unassessed, and you hold the merged findings, the check results, and the list of what was skimmed, did not run, or did not assess.
 
 ## 5. Vote on the findings
 
@@ -107,9 +109,9 @@ Recommend one verdict for a pull request, from the findings that survived:
 
 - **Request changes** when any finding is Blocking.
 - **Approve** when nothing is Blocking, you reviewed all of the change, and it clearly improves the code even if imperfect. Suggestions and Nits ride along with an approval.
-- **Comment** otherwise: a blocking Question is open, or you cannot vouch for the change because part of it is skimmed or unassessed, a required check is failing, or a security-sensitive part is beyond your confidence. Say what is missing.
+- **Comment** otherwise: a blocking Question is open, or you cannot vouch for the change because part of it is skimmed or unassessed, a check failed or could not run, or a security-sensitive part is beyond your confidence. Say what is missing.
 
-Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most: the size note if there is one, what you skimmed, did not run, or did not assess, a failing check if there is one, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
+Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most: the size note if there is one, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
 
 Write each comment so the author can act on it at a glance:
 
