@@ -38,7 +38,7 @@ For a pull request, review its head branch in a local checkout, in this order:
 
 Bring the checkout to the pull request's head: run `git fetch` and fast-forward a branch that is only behind with `git merge --ff-only`. Done when `git rev-parse HEAD` equals `headRefOid`. When the checkout has diverged, is ahead, or has uncommitted changes, stop and tell the user rather than review code that is not the pull request's.
 
-Leave a worktree you created in place and report its path.
+Note what this step created, for step 7: the worktree and its path (items 2 and 3) and the branch (item 3 only, since item 2 reuses an existing one). Report the path.
 
 ## 3. Read the change
 
@@ -96,3 +96,16 @@ The file holds `commit_id` (`headRefOid`), `event`, `body`, and `comments`, each
 On the user's own pull request, GitHub rejects `APPROVE` and `REQUEST_CHANGES`, so submit `COMMENT` and say that the verdict stays advice.
 
 Done when the review is posted. Report its URL.
+
+## 7. Offer to clean up
+
+Skip this step when step 2 created nothing. Once the review is posted, or when the user decides to post nothing, offer to remove what step 2 created, naming the worktree path and the branch, and wait for the answer. The user may keep them to re-review after the author pushes.
+
+On a yes, run from the original checkout, since a worktree cannot remove the folder you stand in:
+
+```bash
+git worktree remove <path>
+git branch -d <headRefName>
+```
+
+Run the second command only for a branch step 2 created. Never pass `--force` or `-D`: when git refuses because of uncommitted or unpushed work, report that and leave it. Done when git has removed what the user approved, or has refused and the refusal is reported.
