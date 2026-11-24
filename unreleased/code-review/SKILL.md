@@ -11,6 +11,15 @@ Narrate the review as it runs. Before each step, say what you are about to do, i
 
 The rules below are defaults. Where the repository's own agent instructions (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`) say otherwise about reviews, worktrees, or standards, follow the repository.
 
+## Delegation
+
+Sub agents do the review itself, in steps 4 and 5. The main agent does every other step, orchestrates the sub agents, and holds every exchange with the user. A sub agent knows only its brief, so give it the target, the checkout path, the command that prints the diff, and the exact shape of what it returns.
+
+- Step 4 runs one sub agent per review area.
+- Step 5 runs three sub agents per finding.
+
+No sub agent edits code, posts, or creates or removes anything. Announce each batch before launching it: how many sub agents, and for what. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed.
+
 ## 1. Resolve the target
 
 With no argument, the target is the local changes: staged, unstaged, and untracked files (`git status --porcelain`). When there are none, say so and stop.
@@ -21,7 +30,7 @@ Otherwise read `<owner>`, `<repo>`, and `<number>` from the argument: a number b
 gh pr view <number> -R <owner>/<repo> --json author,state,title,body,url,baseRefName,headRefName,headRefOid,closingIssuesReferences
 ```
 
-Stop and say why when `state` is not `OPEN`. Note whether `author.login` equals `gh api user --jq .login`: the user may review their own pull request, which changes only how step 6 posts.
+Stop and say why when `state` is not `OPEN`. Note whether `author.login` equals `gh api user --jq .login`: the user may review their own pull request, which changes only how step 7 posts.
 
 ## 2. Get the code
 
@@ -40,7 +49,7 @@ For a pull request, review its head branch in a local checkout, in this order:
 
 Bring the checkout to the pull request's head: run `git fetch` and fast-forward a branch that is only behind with `git merge --ff-only`. Done when `git rev-parse HEAD` equals `headRefOid`. When the checkout has diverged, is ahead, or has uncommitted changes, stop and tell the user rather than review code that is not the pull request's.
 
-Note what this step created, for step 7: the worktree and its path (items 2 and 3) and the branch (item 3 only, since item 2 reuses an existing one). Report the path.
+Note what this step created, for step 8: the worktree and its path (items 2 and 3) and the branch (item 3 only, since item 2 reuses an existing one). Report the path.
 
 ## 3. Read the change
 
@@ -50,23 +59,22 @@ For a pull request, also read its description, the issues in `closingIssuesRefer
 
 ## 4. Review
 
-Review top-down, and read every changed file.
+Launch one sub agent per review area below. Run the automation sub agent first, and launch the rest together, each briefed with the description, the linked issues, the points already raised, the automation report, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each to read every changed file for its area only. Launch an area marked "when" only where the diff touches it.
 
-1. **Scope and fit.** Decide whether the change should exist. Compare the description and each linked issue with what the diff does, and report the goals it misses and the changes it does not declare. Check size and focus: a large change (about 20 files, or several hundred hand-written changed lines) or one that mixes a refactor or reformatting with behavior gets a note first in the summary and a recommendation to split. Skim generated and lock files, and record every part you only skimmed.
-2. **Design.** Read the files that hold the logic first, then the rest. Report a major design problem as soon as you find it, before reading on.
-3. **Dimensions.** Check each changed file against these, applying a dimension marked "when" only where the diff touches it:
-   - **Functionality:** edge cases, error handling, and concurrency when shared state or async code changes.
-   - **Security,** when the diff touches input handling, authentication, authorization, cryptography, secrets, serialization, or file, process, or query construction: review the change for security. Trace data from its sources to its sinks across each changed trust boundary, and check the impact on existing controls, new attack vectors, new integrations, and regressions. When unsure about authentication, authorization, cryptography, or secrets, raise a blocking Question and recommend a human reviewer for that part.
-   - **Tests:** new or changed logic has tests that would fail if the code broke. Read the tests as code: meaningful assertions, no false positives.
-   - **Complexity:** nothing more generic or elaborate than the problem needs.
-   - **Compatibility,** when the diff changes a public surface (exported API, CLI flags, config keys, file or wire formats, database schema, skill names and arguments): the break is declared and comes with a deprecation or migration path.
-   - **Dependencies,** when a manifest or lockfile changes: necessity, maintenance state, license, known vulnerabilities, lockfile consistency.
-   - **Performance:** only concrete risks visible in the diff, such as an unbounded query or repeated work in a loop.
-   - **Documentation:** updated when user-facing behavior, the build, or the release changes.
-   - **Naming and comments** (why, not what), and consistency with the surrounding code and the repository's rules.
-4. **Automation.** For a pull request, read the CI status (`gh pr checks`) and the repository's lint configuration. Leave out what a formatter or linter enforces, and report a failing required check once, in the summary.
+- **Automation,** for a pull request: read the CI status (`gh pr checks`) and the repository's lint and formatter configuration. Return the failing required checks and the rules a formatter or linter already enforces; it returns no findings.
+- **Scope and fit:** the change should exist, and the description and each linked issue match what the diff does. Report the goals it misses and the changes it does not declare. A large change (about 20 files, or several hundred hand-written changed lines), or one that mixes a refactor or reformatting with behavior, gets a note and a recommendation to split. Skim generated and lock files, and list every part skimmed.
+- **Design:** read the files that hold the logic first, then the rest, and judge how the pieces fit the codebase.
+- **Functionality:** edge cases, error handling, and concurrency when shared state or async code changes.
+- **Security,** when the diff touches input handling, authentication, authorization, cryptography, secrets, serialization, or file, process, or query construction: review the change for security. Trace data from its sources to its sinks across each changed trust boundary, and check the impact on existing controls, new attack vectors, new integrations, and regressions. When unsure about authentication, authorization, cryptography, or secrets, raise a blocking Question and recommend a human reviewer for that part.
+- **Tests:** new or changed logic has tests that would fail if the code broke. Read the tests as code: meaningful assertions, no false positives.
+- **Complexity:** nothing more generic or elaborate than the problem needs.
+- **Compatibility,** when the diff changes a public surface (exported API, CLI flags, config keys, file or wire formats, database schema, skill names and arguments): the break is declared and comes with a deprecation or migration path.
+- **Dependencies,** when a manifest or lockfile changes: necessity, maintenance state, license, known vulnerabilities, lockfile consistency.
+- **Performance:** only concrete risks visible in the diff, such as an unbounded query or repeated work in a loop.
+- **Documentation:** updated when user-facing behavior, the build, or the release changes.
+- **Naming and comments** (why, not what), and consistency with the surrounding code and the repository's rules.
 
-Sort each finding into one level:
+Each other sub agent returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. It leaves out what a formatter or linter enforces.
 
 | Level      | When                                                                                        |
 |:-----------|:--------------------------------------------------------------------------------------------|
@@ -77,11 +85,25 @@ Sort each finding into one level:
 
 A finding is Blocking when merging leaves the codebase or its users worse off than not merging: incorrect or unhandled behavior, a regression, a vulnerability, an undeclared break of a public surface, new logic without meaningful tests, complexity or duplication the change adds, or a description or linked issue the change misses or contradicts. A problem that predates the change is a Suggestion with a follow-up issue.
 
-Done when every changed file is read, every finding carries a level and a `path:line`, and you can list what you skimmed or did not run.
+Merge findings from different dimensions that claim the same problem at the same place. Done when every sub agent has returned or been reported as unassessed, and you hold the merged findings, the automation report, and the list of what was skimmed, did not run, or did not assess. A failing required check goes to the summary and is not voted on.
 
-## 5. Present the review
+## 5. Vote on the findings
 
-Recommend one verdict for a pull request:
+Skip this step when there are fewer than 3 findings, and say so.
+
+Launch three sub agents per finding, together. Brief each with only the claim, its `path:line`, the checkout path, and the level table and Blocking definition from step 4. Withhold the finding's level, its dimension, and the other votes, so each voter decides alone. Each voter tries to refute the claim from the code, then returns `confirm` or `refute`, the evidence, and a level.
+
+Settle each finding:
+
+- It survives when at least two of its voters confirm; otherwise drop it.
+- Its level is the median of the confirming votes, ordered Nit, Suggestion, Blocking. A Question keeps the level it was raised with.
+- It stays Blocking only when all three voters confirm and the median is Blocking; with two confirmations it becomes a Suggestion.
+
+Keep each dropped finding's claim and `path:line` for step 6. Done when every finding has three votes and an outcome.
+
+## 6. Present the review
+
+Recommend one verdict for a pull request, from the findings that survived:
 
 - **Request changes** when any finding is Blocking.
 - **Approve** when nothing is Blocking, you reviewed all of the change, and it clearly improves the code even if imperfect. Suggestions and Nits ride along with an approval.
@@ -97,11 +119,13 @@ Write each comment so the author can act on it at a glance:
 - Point at code by its line instead of quoting it, and put a small, concrete fix in a GitHub `suggestion` block.
 - List Blocking comments first. Leave Nits out when anything is Blocking, and keep them few otherwise.
 
-For local changes, present the findings by `path:line` and level, with no verdict or draft; there is nothing to post.
+After the draft, list the findings dropped by vote, one line each with its claim and `path:line`, so the user can restore one.
 
-Ask the user which comments to post and which verdict to use. They may approve any subset by number, reword a comment, or change the verdict. Stop here until the user answers.
+For local changes, present the surviving findings by `path:line` and level, with no verdict or draft; there is nothing to post.
 
-## 6. Post
+Ask the user which comments to post and which verdict to use. They may approve any subset by number, reword a comment, restore a dropped finding, or change the verdict. Stop here until the user answers.
+
+## 7. Post
 
 Skip this step for local changes.
 
@@ -117,7 +141,7 @@ On the user's own pull request, GitHub rejects `APPROVE` and `REQUEST_CHANGES`, 
 
 Done when the review is posted. Report its URL.
 
-## 7. Offer to clean up
+## 8. Offer to clean up
 
 Skip this step when step 2 created nothing. Once the review is posted, or when the user decides to post nothing, offer to remove what step 2 created, naming the worktree path and the branch, and wait for the answer. The user may keep them to re-review after the author pushes.
 
