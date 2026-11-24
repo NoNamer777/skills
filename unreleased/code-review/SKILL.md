@@ -62,7 +62,7 @@ For a pull request, also read its description, the issues in `closingIssuesRefer
 
 ## 4. Review
 
-Launch one sub agent per area below, together, each briefed with the description, the linked issues, the points already raised, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each reviewer to read every changed file for its area only. Launch an area marked "when" only where the diff touches it.
+Launch one sub agent per area below, together, each briefed with the description, the linked issues, the points already raised, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each reviewer to read every changed file for its area only. Launch an area marked "when" only where the diff touches it. Cover a small change (about 10 files or fewer) with fewer reviewers: fold Complexity into Design, Performance into Functionality, and Naming and comments into Documentation.
 
 The checks sub agent runs the pull request's code. When the head is in a fork (`isCrossRepository`) or the author association is not `OWNER`, `MEMBER`, or `COLLABORATOR`, ask the user before launching it; when they decline, skip it and treat the checks as unassessed.
 
@@ -74,7 +74,7 @@ The checks sub agent runs the pull request's code. When the head is in a fork (`
   - **Browser:** when the diff affects something that renders (a web app, a Storybook story, a page a server returns), start it from the repository's own instructions, in the checkout and against local services only. Exercise what the diff changes: the changed screens, stories, endpoints, or commands, the behavior the description promises, the viewports and themes the diff or the issue names, and the narrowest and widest the project supports. Measure what a claim depends on, such as a width or an overflow, instead of estimating it. Watch for console and server errors. Use the user's own browser (Claude in Chrome) when a tool for it is available, over a built-in one, in a tab of your own that you close afterward, and touch no other tab. When the app needs configuration the checkout lacks, such as an `.env`, report the test as skipped instead of copying or inventing secrets.
   - **Stop** what you started.
   - **Return** each check and app test as pass, fail, or skipped, with the reason it was selected or skipped. For each failure return the command, the output that shows it, whether it points at files the diff changes, and the steps to reproduce it. Also return the files the run changed (`git status --porcelain`).
-- **Scope and fit:** the change should exist, and the description and each linked issue match what the diff does. Report the goals it misses and the changes it does not declare. A large change (about 20 files, or several hundred hand-written changed lines), or one that mixes a refactor or reformatting with behavior, gets a note and a recommendation to split. Skim generated and lock files, and list every part skimmed.
+- **Scope and fit:** the change should exist, and the description and each linked issue match what the diff does. Report the goals it misses and the changes it does not declare. Compare with how the repository landed earlier changes of the same kind (`git log` of sibling files), and report what they changed that this one does not, such as documentation, end-to-end checks, or lists of siblings. A large change (about 20 files, or several hundred hand-written changed lines), or one that mixes a refactor or reformatting with behavior, gets a note and a recommendation to split. Skim generated and lock files, and list every part skimmed.
 - **Design:** read the files that hold the logic first, then the rest, and judge how the pieces fit the codebase.
 - **Functionality:** edge cases, error handling, and concurrency when shared state or async code changes.
 - **Security,** when the diff touches input handling, authentication, authorization, cryptography, secrets, serialization, or file, process, or query construction: review the change for security. Trace data from its sources to its sinks across each changed trust boundary, and check the impact on existing controls, new attack vectors, new integrations, and regressions. When unsure about authentication, authorization, cryptography, or secrets, raise a blocking Question and recommend a human reviewer for that part.
@@ -82,11 +82,11 @@ The checks sub agent runs the pull request's code. When the head is in a fork (`
 - **Complexity:** nothing more generic or elaborate than the problem needs.
 - **Compatibility,** when the diff changes a public surface (exported API, CLI flags, config keys, file or wire formats, database schema, skill names and arguments): the break is declared and comes with a deprecation or migration path.
 - **Dependencies,** when a manifest or lockfile changes: necessity, maintenance state, license, known vulnerabilities, lockfile consistency.
-- **Performance:** only concrete risks visible in the diff, such as an unbounded query or repeated work in a loop.
+- **Performance,** when the diff touches a query, a loop over data, a rendering path, or what a bundle contains: only concrete risks visible in the diff, such as an unbounded query or repeated work in a loop.
 - **Documentation:** updated when user-facing behavior, the build, or the release changes.
 - **Naming and comments** (why, not what), and consistency with the surrounding code and the repository's rules.
 
-Each reviewer returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. It leaves out what a formatter or linter enforces.
+Each reviewer returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. Its `path:line` is `none` for a point about the change as a whole, or about a file the diff should have changed and did not. It leaves out what a formatter or linter enforces.
 
 | Level      | When                                                                                                               |
 |:-----------|:-------------------------------------------------------------------------------------------------------------------|
@@ -95,7 +95,7 @@ Each reviewer returns its findings, or none. A finding has a `path:line`, a leve
 | Question   | The intent or a choice is unclear; the reviewer labels it blocking when its answer could reveal a Blocking finding |
 | Nit        | Taste, or a point no rule covers; never gates a verdict                                                            |
 
-A finding is Blocking when merging leaves the codebase or its users worse off than not merging: incorrect or unhandled behavior, a regression, a vulnerability, an undeclared break of a public surface, new logic without meaningful tests, complexity or duplication the change adds, or a description or linked issue the change misses or contradicts. A problem that predates the change is a Suggestion with a follow-up issue.
+A finding is Blocking when merging leaves the codebase or its users worse off than not merging. That covers incorrect or unhandled behavior, a regression, a vulnerability, an undeclared break of a public surface, new logic without meaningful tests, and complexity or duplication the change adds. It also covers a description or linked issue the change misses or contradicts, and documentation the change makes false (a stale statement; a missing entry is a Suggestion). A problem that predates the change is a Suggestion with a follow-up issue.
 
 Merge findings from different areas that claim the same problem at the same place. A check or app test that fails at files the diff changes becomes a Blocking finding with its reproduction, and skips the vote; every other failure and every skip goes to the summary and prevents Approve. Done when every sub agent has returned or been reported as unassessed, and you hold the merged findings, the check results, and the list of what was skimmed, did not run, or did not assess.
 
