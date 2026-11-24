@@ -7,6 +7,8 @@ disable-model-invocation: true
 
 Review a pull request, or the local changes when no pull request is given, and advise on it: a verdict and a set of short review comments, anchored inline where possible. Advice changes nothing; the skill edits no code, and every review comment and submission waits for the user's approval.
 
+Narrate the review as it runs. Before each step, say what you are about to do, including every worktree, branch, fetch, and post. Say what you run into as you meet it: a command git or `gh` refuses, a check that fails, a stop condition, an assumption you make, a step you skip and why.
+
 The rules below are defaults. Where the repository's own agent instructions (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`) say otherwise about reviews, worktrees, or standards, follow the repository.
 
 ## 1. Resolve the target
