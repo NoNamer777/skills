@@ -16,9 +16,9 @@ The rules below are defaults. Where the repository's own agent instructions (`AG
 Sub agents do the review itself, in steps 4 and 5. The main agent does every other step, orchestrates the sub agents, and holds every exchange with the user. A sub agent knows only its brief, so give it the target, the checkout path, the command that prints the diff, and the exact shape of what it returns.
 
 - Step 4 runs one sub agent per review area, and one that runs the checks.
-- Step 5 runs three sub agents per finding.
+- Step 5 runs three sub agents per finding that could gate the verdict.
 
-No sub agent edits source files, posts, or removes anything. The checks sub agent may write build output, build images, and start apps and a browser tab, and stops what it started. Announce each batch before launching it: how many sub agents, and for what. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed.
+No sub agent edits source files, posts, or removes anything. The checks sub agent may write build output, build images, and start apps and a browser tab, and stops what it started. A voter starts only what it needs to measure a claim, from scratch files outside the checkout, and stops it. Announce each batch before launching it: how many sub agents, and for what. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed.
 
 ## 1. Resolve the target
 
@@ -88,12 +88,12 @@ The checks sub agent runs the pull request's code. When the head is in a fork (`
 
 Each reviewer returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. It leaves out what a formatter or linter enforces.
 
-| Level      | When                                                                                        |
-|:-----------|:--------------------------------------------------------------------------------------------|
-| Blocking   | Merging makes things worse: see below                                                       |
-| Suggestion | The change works and could be better; the author may decline                                |
-| Question   | The intent or a choice is unclear; blocking when its answer could reveal a Blocking finding |
-| Nit        | Taste, or a point no rule covers; never gates a verdict                                     |
+| Level      | When                                                                                                               |
+|:-----------|:-------------------------------------------------------------------------------------------------------------------|
+| Blocking   | Merging makes things worse: see below                                                                              |
+| Suggestion | The change works and could be better; the author may decline                                                       |
+| Question   | The intent or a choice is unclear; the reviewer labels it blocking when its answer could reveal a Blocking finding |
+| Nit        | Taste, or a point no rule covers; never gates a verdict                                                            |
 
 A finding is Blocking when merging leaves the codebase or its users worse off than not merging: incorrect or unhandled behavior, a regression, a vulnerability, an undeclared break of a public surface, new logic without meaningful tests, complexity or duplication the change adds, or a description or linked issue the change misses or contradicts. A problem that predates the change is a Suggestion with a follow-up issue.
 
@@ -101,17 +101,19 @@ Merge findings from different areas that claim the same problem at the same plac
 
 ## 5. Vote on the findings
 
-Skip this step when there are fewer than 3 findings, and say so.
+Vote on the findings that could gate the verdict: each Blocking finding and each blocking Question. Suggestions, Nits, and non-blocking Questions skip the vote and go to step 6 unvoted. Skip this step when no finding could gate the verdict, and say so.
 
-Launch three sub agents per finding, together. Brief each with only the claim, its `path:line`, the checkout path, and the level table and Blocking definition from step 4. Withhold the finding's level, its dimension, and the other votes, so each voter decides alone. Each voter tries to refute the claim from the code, then returns `confirm` or `refute`, the evidence, and a level.
+Launch three sub agents per voted finding, together. Brief each with only the claim, its `path:line`, the checkout path, and the level table and Blocking definition from step 4. Withhold the finding's level, its dimension, and the other votes, so each voter decides alone. Each voter tries to refute the claim from the code. When the claim is about runtime behavior or a measurable quantity, such as a width or an overflow, the voter measures it. It works from scratch files outside the checkout, uses the repository's own fonts, styles, and tools, and stops what it starts. It returns `confirm` or `refute`, the evidence with each number marked measured or estimated, and a level.
 
 Settle each finding:
 
 - It survives when at least two of its voters confirm; otherwise drop it.
-- Its level is the median of the confirming votes, ordered Nit, Suggestion, Blocking. A Question keeps the level it was raised with.
+- Its level is the median of the confirming votes, ordered Nit, Suggestion, Blocking. A Question keeps the blocking or non-blocking label it was raised with.
 - It stays Blocking only when all three voters confirm and the median is Blocking; with two confirmations it becomes a Suggestion.
+- When voters disagree on a fact that one command settles, such as what a file contains or how earlier changes landed, run the command and settle by the fact.
+- A finding that survives on estimates alone, where a measurement was possible, stays and is marked unverified for step 6, with the measurement that would settle it.
 
-Keep each dropped finding's claim and `path:line` for step 6. Done when every finding has three votes and an outcome.
+Keep each dropped finding's claim and `path:line` for step 6. Done when every voted finding has three votes and an outcome.
 
 ## 6. Present the review
 
@@ -121,7 +123,7 @@ Recommend one verdict for a pull request, from the findings that survived:
 - **Approve** when nothing is Blocking, you reviewed all of the change, and it clearly improves the code even if imperfect. Suggestions and Nits ride along with an approval.
 - **Comment** otherwise: a blocking Question is open, or you cannot vouch for the change because part of it is skimmed or unassessed, a check failed or could not run, or a security-sensitive part is beyond your confidence. Say what is missing.
 
-Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most: the size note if there is one, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
+Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most. It holds the size note if there is one, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
 
 Write each comment so the author can act on it at a glance:
 
@@ -131,7 +133,11 @@ Write each comment so the author can act on it at a glance:
 - Point at code by its line instead of quoting it, and put a small, concrete fix in a GitHub `suggestion` block.
 - List Blocking comments first. Leave Nits out when anything is Blocking, and keep them few otherwise.
 
-After the draft, list the findings dropped by vote, one line each with its claim and `path:line`, so the user can restore one.
+After the draft, list for the user:
+
+- The findings dropped by vote, one line each with its claim and `path:line`, so the user can restore one.
+- The findings marked unverified, each with the measurement that would settle it.
+- The Suggestions and Nits you left out of the draft, one line each.
 
 For local changes, present the surviving findings by `path:line` and level, with no verdict or draft; there is nothing to post.
 
