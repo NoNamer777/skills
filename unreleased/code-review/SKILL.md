@@ -62,7 +62,7 @@ Note what this step created, for step 8: the worktree and its path (items 2 and 
 
 Read the full diff: `gh pr diff <number> -R <owner>/<repo>` for a pull request, and `git diff HEAD` plus the untracked files for local changes. Read the code around each hunk, not only the hunk.
 
-For a pull request, also read its description and the issues in `closingIssuesReferences`. Then read every review with its body, its inline comments, and every reply to them, and every conversation comment:
+For a pull request, also read its description, the issues in `closingIssuesReferences`, and each issue its title, description, or branch name refers to in the repository's tracker (Jira, say), with its comments, read through the tracker's read-only tools. Then read every review with its body, its inline comments, and every reply to them, and every conversation comment, on this pull request and on any closed one with the same head branch (`gh pr list -R <owner>/<repo> --state closed --head <headRefName>`):
 
 ```bash
 gh pr view <number> -R <owner>/<repo> --json reviews,comments
@@ -79,6 +79,8 @@ gh pr list -R <owner>/<repo> --state open --base <branch> --json number,headRefN
 ```
 
 The first finds the pull request below a branch, and the second those above it. Walk down from `baseRefName` until the base is the default branch or no open pull request has it as head, and up from `headRefName` until none is based on it. Read every other pull request in the stack in its entirety: its description, its full diff, and its reviews, comments, and replies, as above. The stack is context only. The review covers this pull request's diff, and a line elsewhere in the stack becomes a finding only when this change makes it false.
+
+A **companion** is a pull request in another repository that ships the same issue, such as the client half of a server change. Find companions through the description, the linked issues, and `gh search prs <issue key> --owner <owner>`, and read each through `gh` like a stack member, for context only.
 
 ## 4. Review
 
