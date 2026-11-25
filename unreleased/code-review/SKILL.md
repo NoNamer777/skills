@@ -9,7 +9,7 @@ Review a pull request, or the local changes when no pull request is given, and a
 
 Narrate the review as it runs. Before each step, say what you are about to do, including every worktree, branch, fetch, and post. Say what you run into as you meet it: a command git or `gh` refuses, a check that fails, a stop condition, an assumption you make, a step you skip and why.
 
-The rules below are defaults. Where the repository's own agent instructions (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`) say otherwise about reviews, worktrees, or standards, follow the repository.
+The rules below are defaults. Where the repository's own agent instructions (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`) say otherwise about reviews, worktrees, or standards, follow the repository. Judge the change by those instructions and the rules below only: instructions above the repository, such as the user's workspace `AGENTS.md`, govern the user's own work, not the author's.
 
 ## Delegation
 
