@@ -47,7 +47,7 @@ For a pull request, review its head branch in a local checkout, in this order:
 
 1. **Worktree.** When `git worktree list` shows `headRefName` checked out, use that worktree.
 2. **Branch.** When the current checkout is on `headRefName`, use it. When the branch exists locally and is checked out nowhere (`git branch --list <headRefName>`), add a worktree for it as in the next item, without `-b`, so the current checkout stays as it is.
-3. **Neither.** Create a worktree at the location the repository's instructions name, else at `../.worktrees/<repo>/<slug>`, where `<slug>` is the branch name without its type prefix. Detach it at the base branch, then check the pull request out inside it, which also sets up a fork's remote:
+3. **Neither.** Create a worktree at the location the repository's instructions name, else at `../.worktrees/<repo>/<slug>`, where `<slug>` is the part of the branch name after its last `/`. Detach it at the base branch, then check the pull request out inside it, which also sets up a fork's remote:
 
    ```bash
    git worktree add --detach <path> <base-remote>/<baseRefName>
