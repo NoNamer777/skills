@@ -149,7 +149,7 @@ Recommend one verdict for a pull request, from the findings that survived:
 - **Approve** when nothing is Blocking, you reviewed all of the change, and it clearly improves the code even if imperfect. Suggestions and Nits ride along with an approval.
 - **Comment** otherwise: a blocking Question is open, or you cannot vouch for the change because part of it is skimmed or unassessed, a failure or skip that step 4 says prevents Approve, or a security-sensitive part is beyond your confidence. Say what is missing.
 
-Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most. It holds the size note if there is one, the conflicting files, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
+Give the verdict with one line of reasoning, then the draft review. The summary body opens with each Blocking finding and blocking Question that has no line in the diff, one labeled paragraph each. A few sentences follow at most: the size note if there is one, the conflicting files, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
 
 Write each comment so the author can act on it at a glance:
 
