@@ -58,16 +58,32 @@ Note what this step created, for step 8: the worktree and its path (items 2 and 
 
 Read the full diff: `gh pr diff <number> -R <owner>/<repo>` for a pull request, and `git diff HEAD` plus the untracked files for local changes. Read the code around each hunk, not only the hunk.
 
-For a pull request, also read its description, the issues in `closingIssuesReferences`, and the existing review threads and comments, so the review does not repeat a point that is already raised.
+For a pull request, also read its description and the issues in `closingIssuesReferences`. Then read every review with its body, its inline comments, and every reply to them, and every conversation comment:
+
+```bash
+gh pr view <number> -R <owner>/<repo> --json reviews,comments
+gh api repos/<owner>/<repo>/pulls/<number>/comments --paginate
+```
+
+The second command returns the inline comments; a reply carries the `in_reply_to_id` of the comment it answers. Done when you hold every point already raised, each with its outcome: fixed (with its commit), declined (with the reason), or open. A reviewer raises such a point again only when it is still open or its fix does not hold.
+
+A pull request is **stacked** when its base branch is not the repository's default branch (`gh repo view -R <owner>/<repo> --json defaultBranchRef`), or when an open pull request is based on its head branch. Walk the stack both ways:
+
+```bash
+gh pr list -R <owner>/<repo> --state open --head <branch> --json number,baseRefName
+gh pr list -R <owner>/<repo> --state open --base <branch> --json number,headRefName
+```
+
+The first finds the pull request below a branch, and the second those above it. Walk down from `baseRefName` until the base is the default branch or no open pull request has it as head, and up from `headRefName` until none is based on it. Read every other pull request in the stack in its entirety: its description, its full diff, and its reviews, comments, and replies, as above. The stack is context only. The review covers this pull request's diff, and a line elsewhere in the stack becomes a finding only when this change makes it false.
 
 ## 4. Review
 
-Launch one sub agent per area below, together, each briefed with the description, the linked issues, the points already raised, the checkout path, the command that prints the diff, the level table and the Blocking definition below. Tell each reviewer to read every changed file for its area only. Launch an area marked "when" only where the diff touches it. Cover a small change (about 10 files or fewer) with fewer reviewers: fold Complexity into Design, Performance into Functionality, and Naming and comments into Documentation.
+Launch one sub agent per area below, together, each briefed with the description, the linked issues, the points already raised, with their outcomes, the checkout path, the command that prints the diff and, for a stacked pull request, each other pull request in the stack with the command that prints its diff, the level table and the Blocking definition below. Tell each reviewer to read every changed file for its area only. Launch an area marked "when" only where the diff touches it. Cover a small change (about 10 files or fewer) with fewer reviewers: fold Complexity into Design, Performance into Functionality, and Naming and comments into Documentation.
 
 The checks sub agent runs the pull request's code. When the head is in a fork (`isCrossRepository`) or the author association is not `OWNER`, `MEMBER`, or `COLLABORATOR`, ask the user before launching it; when they decline, skip it and treat the checks as unassessed.
 
 - **Checks:** run locally what CI would run for this diff, and try the change in a browser where it renders. It returns no findings.
-  - **Select** by relevance, never by completeness. Read the CI definitions in the checkout (`.github/workflows` and any other CI configuration), with their path filters and affected-project detection. Read the checks the repository's agent instructions name for a change, and, for a pull request, its required checks from `gh pr checks <number>`. Run a check when the diff touches its inputs or what it guards.
+  - **Select** by relevance, never by completeness. Read the CI definitions in the checkout (`.github/workflows` and any other CI configuration), with their path filters and affected-project detection, with `<base-remote>/<baseRefName>` as the base, which for a stacked pull request is the branch below it. Read the checks the repository's agent instructions name for a change, and, for a pull request, its required checks from `gh pr checks <number>`. Run a check when the diff touches its inputs or what it guards.
   - **Match** the checks to the change, where the repository has them. Documentation only: markdown lint, format check, and a link check where the repository has one. Code: lint, format check, type check, build, and the tests of the affected projects. A Dockerfile, its context, or the build it wraps: build the image locally, with no login and no push. A UI component or its styles: build Storybook and inspect the affected stories in a browser. Behavior a user can reach: the end-to-end tests, against the local dev server or the locally built image. Every change: the commit lint over its commits and, for a pull request, over its title, where the repository has one.
   - **Run** each check in its check-only form, never a fixer, with the repository's pinned tooling. Install first when dependencies are missing.
   - **Skip** a step only when it needs secrets, deploys, publishes, or targets another platform, when a tool it needs is unavailable, or when the diff cannot affect it. Never skip a step for its cost. List each skip with its reason.
