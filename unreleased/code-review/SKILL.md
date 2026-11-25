@@ -31,13 +31,13 @@ With no argument, the target is the local changes: staged, unstaged, and untrack
 Otherwise read `<owner>`, `<repo>`, and `<number>` from the argument: a number belongs to the current repository (`gh repo view --json owner,name`), and a URL or `<owner>/<repo>#<number>` names its own. Fetch the pull request:
 
 ```bash
-gh pr view <number> -R <owner>/<repo> --json author,state,title,body,url,baseRefName,headRefName,headRefOid,isCrossRepository,closingIssuesReferences
+gh pr view <number> -R <owner>/<repo> --json author,state,title,body,url,baseRefName,headRefName,headRefOid,isCrossRepository,closingIssuesReferences,mergeable
 gh api repos/<owner>/<repo>/pulls/<number> --jq .author_association
 ```
 
 The second command reads `authorAssociation`, which `gh pr view` has no field for.
 
-Stop and say why when `state` is not `OPEN`. Reading and drafting use the user's own account. When the repository's instructions name a separate account for reviews, step 7 switches to it just before posting, and back right after. Note whether `author.login` equals the login that will post: the review account when one is named, else the result of `gh api user --jq .login`. The user may review their own pull request, which changes only how step 7 posts.
+Stop and say why when `state` is not `OPEN`. When `mergeable` is `CONFLICTING`, say so, and name the conflicting files in the summary. A finding that holds only once the base is merged in is still a finding of this change; it is measured in a scratch clone with the base merged in. Reading and drafting use the user's own account. When the repository's instructions name a separate account for reviews, step 7 switches to it just before posting, and back right after. Note whether `author.login` equals the login that will post: the review account when one is named, else the result of `gh api user --jq .login`. The user may review their own pull request, which changes only how step 7 posts.
 
 ## 2. Get the code
 
@@ -149,7 +149,7 @@ Recommend one verdict for a pull request, from the findings that survived:
 - **Approve** when nothing is Blocking, you reviewed all of the change, and it clearly improves the code even if imperfect. Suggestions and Nits ride along with an approval.
 - **Comment** otherwise: a blocking Question is open, or you cannot vouch for the change because part of it is skimmed or unassessed, a check failed or could not run, other than a pre-existing failure, or a security-sensitive part is beyond your confidence. Say what is missing.
 
-Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most. It holds the size note if there is one, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
+Give the verdict with one line of reasoning, then the draft review. The summary body is a few sentences at most. It holds the size note if there is one, the conflicting files, what you skimmed, did not run, or did not assess, any failed or skipped check or app test, and at most one sincere line of praise. Anchor each inline comment on a line that is part of the diff; a finding about the change as a whole, or about a line outside the diff, goes in the summary.
 
 Write each comment so the author can act on it at a glance:
 
