@@ -2,6 +2,16 @@
 
 Agent skills for Claude Code and other coding agents. Each skill is a folder under `skills/` with a `SKILL.md` that tells the agent when to use it and what to do.
 
+## Skills
+
+| Skill                                                              | What it does                                                                                                |
+|:-------------------------------------------------------------------|:------------------------------------------------------------------------------------------------------------|
+| [`addressing-pr-comments`](skills/addressing-pr-comments/SKILL.md) | Triages the open review feedback on your pull request, then fixes and replies to what you approve           |
+| [`code-review`](skills/code-review/SKILL.md)                       | Reviews a pull request, or your local changes when you name none, and drafts a verdict with inline comments |
+| [`updating-pr-branch`](skills/updating-pr-branch/SKILL.md)         | Merges a pull request's latest base branch into its head, resolves conflicts, and pushes                    |
+
+Each skill runs only when you call it by name: `/<skill>` with skills.sh, or `/nonamer777-skills:<skill>` with the plugin. Each takes an optional pull request number, URL, or `<owner>/<repo>#<number>`. Without one, `code-review` reviews your local changes and the others take the current branch's pull request.
+
 ## Install
 
 Install the skills as a Claude Code plugin, which updates itself:
