@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-26
+
+### Changed
+
+- `code-review` starts two voters per finding and a third only when its vote can change the outcome. It keeps each batch within the sub agent limit, votes first on the findings that decide the verdict, and runs voters on a smaller model.
+- `code-review` writes the context every sub agent shares to one brief file, keeps sub agent reports short, and hands each open question to one review area, so a review spends less context and repeats less work.
+- `code-review` reads the design documents a pull request links itself, and reviews output a person reads, such as labels, bot comments, and CLI output.
+- `code-review` skips a check that already passed in the pull request's CI on its head commit, and mentions such skips to you instead of in the posted review.
+- `code-review` lets you add a comment of your own to the draft, and reports progress per batch instead of per sub agent.
+
+### Fixed
+
+- `code-review` resumes a sub agent that a usage limit cut off instead of rerunning it, and keeps settled votes in a file that survives a context compaction.
+- `code-review` makes its scratch directories under `/tmp`, since tools such as `tsx --test` failed under macOS's long default temporary path.
+
 ## [0.3.0] - 2026-11-25
 
 ### Added
@@ -24,7 +39,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.0...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/NoNamer777/skills/releases/tag/v0.3.1
 [0.3.0]: https://github.com/NoNamer777/skills/releases/tag/v0.3.0
 [0.2.0]: https://github.com/NoNamer777/skills/releases/tag/v0.2.0
 [0.1.0]: https://github.com/NoNamer777/skills/releases/tag/v0.1.0
