@@ -6,6 +6,7 @@ This file covers adding and changing skills, the changelog, and releases.
 
 - Put each skill in its own folder, `skills/<name>/`, with a `SKILL.md` at its root. Name the folder after the `name` in the frontmatter of `SKILL.md`, in kebab-case.
 - List each skill folder in the `skills` array of `.claude-plugin/plugin.json`, as `./skills/<name>`, in the same change that adds, renames, or removes it, except for a skill you hold back in `unreleased/`, as [Unreleased skills](#unreleased-skills) describes.
+- Keep the [Skills](README.md#skills) table in `README.md` in step with `plugin.json`: add, rename, or remove its row in the same change, and update the row when a skill's purpose changes.
 - Bump `version` in `.claude-plugin/plugin.json` in every change that ships to users, since installed copies update only when it changes. Follow semver: a major bump for a removed or renamed skill, a minor bump for a new skill, and a patch bump for a fix to an existing one. Add the version's section to `CHANGELOG.md` in the same change, as [Changelog](#changelog) describes.
 
 ## Unreleased skills
