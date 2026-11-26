@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 Review a pull request, or the local changes when no pull request is given, and advise on it: a verdict and a set of short review comments, anchored inline where possible. Advice changes nothing; the skill edits no code, and every review comment and submission waits for the user's approval.
 
-Narrate the review as it runs. Before each step, say what you are about to do, including every worktree, branch, fetch, and post. Say what you run into as you meet it: a command git or `gh` refuses, a check that fails, a stop condition, an assumption you make, a step you skip and why.
+Narrate the review as it runs. Before each step, say what you are about to do, including every worktree, branch, fetch, and post. While sub agents run, narrate per batch: how many sub agents it launches and for what, then each finding as it settles. Say what you run into as you meet it: a command git or `gh` refuses, a check that fails, a stop condition, an assumption you make, a step you skip and why.
 
 The rules below are defaults. Where the repository's own agent instructions (`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`) say otherwise about reviews, worktrees, or standards, follow the repository. Judge the change by those instructions and the rules below only: instructions above the repository, such as the user's workspace `AGENTS.md`, govern the user's own work, not the author's.
 
@@ -26,7 +26,7 @@ No sub agent edits source files or posts. Sub agents keep their effects inside t
 
 Make every scratch directory, yours and each sub agent's, with `mktemp -d /tmp/review-<repo>-<number>.XXXX`. It sits under `/tmp` because a long `TMPDIR`, such as macOS's `/var/folders/...`, pushes a tool's socket path past its length limit. Each sub agent points `TMPDIR` at it (and `-Djava.io.tmpdir` for a JVM), and runs the repository's tools from inside the checkout, so its pinned runtimes apply. It may fill the user-level caches of those tools (a package store, `~/.gradle`, a toolchain download) and lists what it added. Before it returns, it stops what it started, removes its scratch directories, and returns the path of any it could not remove.
 
-The checks sub agent alone writes into the checkout: build output, and images under a tag of its own. It may also start apps and a browser tab. A voter reads and measures through the repository, the checkout, and the browser, and starts only what a measurement needs; its brief names any other tool it may use, read-only. Announce each batch before launching it: how many sub agents, and for what. Launch no more sub agents at once than the harness runs, counting those still running: Claude Code refuses a launch past 20, or past `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` when set. When a sub agent is cut off, by a usage limit say, and the harness can resume it (`SendMessage` in Claude Code), resume it so it keeps its work. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed. A sub agent that is stopped or fails leaves its servers, tabs, and scratch directories behind: list them (listening ports, `/tmp`, the browser's tabs) and remove what you can attribute to it before its rerun.
+The checks sub agent alone writes into the checkout: build output, and images under a tag of its own. It may also start apps and a browser tab. A voter reads and measures through the repository, the checkout, and the browser, and starts only what a measurement needs; its brief names any other tool it may use, read-only. Launch no more sub agents at once than the harness runs, counting those still running: Claude Code refuses a launch past 20, or past `CLAUDE_CODE_MAX_CONCURRENT_SUBAGENTS` when set. When a sub agent is cut off, by a usage limit say, and the harness can resume it (`SendMessage` in Claude Code), resume it so it keeps its work. When a sub agent fails or returns something unusable, run it once more; when it fails again, say so and treat its part as unassessed. A sub agent that is stopped or fails leaves its servers, tabs, and scratch directories behind: list them (listening ports, `/tmp`, the browser's tabs) and remove what you can attribute to it before its rerun.
 
 ## 1. Resolve the target
 
@@ -88,7 +88,7 @@ A **companion** is a pull request in another repository that ships the same issu
 
 ## 4. Review
 
-Launch one sub agent per area below, together, each pointed at the brief file and told its area. Tell each reviewer to read every changed file for its area only. Hand each question you want settled, such as one a point already raised leaves open, to exactly one area: the one it belongs to. Launch an area marked "when" only where the diff touches it. Cover a small change (about 10 files or fewer) with fewer reviewers: fold Complexity into Design, Performance into Functionality, and Naming and comments into Documentation.
+Launch one sub agent per area below, together, each pointed at the brief file and told its area. Tell each reviewer to read every changed file for its area only. Hand each question you want settled, such as one a point already raised leaves open, to exactly one area: the one it belongs to. Launch an area marked "when" only where the diff touches it. Cover a small change (about 10 files or fewer) with fewer reviewers: fold Complexity and Usability into Design, Performance into Functionality, and Naming and comments into Documentation.
 
 The checks sub agent runs the pull request's code. When the head is in a fork (`isCrossRepository`) or the author association is not `OWNER`, `MEMBER`, or `COLLABORATOR`, ask the user before launching it; when they decline, skip it and treat the checks as unassessed.
 
@@ -110,6 +110,7 @@ The checks sub agent runs the pull request's code. When the head is in a fork (`
 - **Dependencies,** when a manifest or lockfile changes: necessity, maintenance state, license, known vulnerabilities, lockfile consistency.
 - **Performance,** when the diff touches a query, a loop over data, a rendering path, or what a bundle contains: only concrete risks visible in the diff, such as an unbounded query or repeated work in a loop.
 - **Documentation:** updated when user-facing behavior, the build, or the release changes.
+- **Usability,** when the diff changes output a person reads, such as labels, bot comments, CLI output, or notifications: its wording, its clarity, and how it looks where it appears, such as a label's color.
 - **Naming and comments** (why, not what), and consistency with the surrounding code and the repository's rules.
 
 Each reviewer returns its findings, or none. A finding has a `path:line`, a level, a one-sentence claim, the evidence it read, and a fix when it knows one. Its `path:line` is `none` for a point about the change as a whole, or about a file the diff should have changed and did not. It leaves out what a formatter or linter enforces.
@@ -172,7 +173,7 @@ After the draft, list for the user:
 
 For local changes, present the surviving findings by `path:line` and level, with no verdict or draft; there is nothing to post.
 
-Ask the user which comments to post and which verdict to use. They may approve any subset by number, reword a comment, restore a dropped finding, or change the verdict. Stop here until the user answers.
+Ask the user which comments to post and which verdict to use. They may approve any subset by number, reword a comment, restore a dropped finding, add a comment of their own, or change the verdict. Stop here until the user answers.
 
 ## 7. Post
 
