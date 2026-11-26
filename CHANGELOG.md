@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.3] - 2026-11-26
+
+### Security
+
+- `updating-pr-branch` reads a pull request's agent instructions from its base branch, so a pull request from a fork cannot change the rules its branch is updated by.
+
 ## [0.3.2] - 2026-11-26
 
 ### Security
@@ -46,7 +52,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.2...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.3...HEAD
+[0.3.3]: https://github.com/NoNamer777/skills/releases/tag/v0.3.3
 [0.3.2]: https://github.com/NoNamer777/skills/releases/tag/v0.3.2
 [0.3.1]: https://github.com/NoNamer777/skills/releases/tag/v0.3.1
 [0.3.0]: https://github.com/NoNamer777/skills/releases/tag/v0.3.0
