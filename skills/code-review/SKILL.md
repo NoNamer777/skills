@@ -185,6 +185,7 @@ After the draft, list for the user:
 - The Suggestions and Nits you left out of the draft, one line each.
 - The checks skipped because they passed in the pull request's CI on `headRefOid`.
 - The workflows that did not run on `headRefOid`, each with the condition that kept it off and what would start it, such as adding a label. Offer to start them; that writes to the pull request, so it waits for the user's yes. Once a workflow you started finishes, take its result as CI's and redraft.
+- The unresolved review threads whose fix holds on `headRefOid` (step 3), each with who opened it and the commit that fixes it. Offer to resolve them after the post; resolving waits for the user's yes per thread.
 
 For local changes, present the surviving findings by `path:line` and level, with no verdict or draft; there is nothing to post.
 
@@ -204,14 +205,14 @@ The file holds `commit_id` (`headRefOid`), `event`, `body`, and `comments`, each
 
 On the user's own pull request, GitHub rejects `APPROVE` and `REQUEST_CHANGES`, so submit `COMMENT` and say that the verdict stays advice.
 
-When the user asks, also reply to a thread or resolve it, from the same account, each reply approved as a draft first. Reply to a thread's first comment, and resolve a thread by its `id` from step 3:
+Then resolve the threads the user approved in step 6, from the same account. When the user asks, also reply to a thread or resolve another, each reply approved as a draft first. Reply to a thread's first comment, and resolve a thread by its `id` from step 3:
 
 ```bash
 gh api repos/<owner>/<repo>/pulls/<number>/comments/<comment id>/replies -f body=<text>
 gh api graphql -f id=<thread id> -f query='mutation($id: ID!) { resolveReviewThread(input: { threadId: $id }) { thread { isResolved } } }'
 ```
 
-Switch back to the user's account right after the post and any replies, whether they succeeded or not. Done when the review is posted and the user's account is active again. Report the review's URL.
+Switch back to the user's account right after the post, replies, and resolves, whether they succeeded or not. Done when the review is posted, each approved thread is resolved, and the user's account is active again. Report the review's URL.
 
 ## 8. Offer to clean up
 
