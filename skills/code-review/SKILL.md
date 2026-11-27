@@ -83,6 +83,8 @@ gh api graphql -F owner=<owner> -F repo=<repo> -F number=<number> -f query='
 
 The second command returns the inline comments; a reply carries the `in_reply_to_id` of the comment it answers. The third returns what REST lacks: whether each thread is resolved, with its first comment's `databaseId`, which is that inline comment's `id`. A resolved thread still needs its fix checked in the code. A list with nothing in it can come back null, so guard a jq filter over one with `// []`, as in `.comments // []`. Done when you hold every point already raised, each with its outcome: fixed (with its commit), declined (with the reason), or open. A reviewer raises such a point again only when it is still open or its fix does not hold.
 
+When the login that will post (step 1) has reviewed this pull request before, the run is a **re-review**: steps 3, 4, and 6 change as [Re-review](#re-review) describes.
+
 A pull request is **stacked** when its base branch is not the repository's default branch (`gh repo view -R <owner>/<repo> --json defaultBranchRef`), or when an open pull request is based on its head branch. Walk the stack both ways:
 
 ```bash
@@ -219,3 +221,11 @@ git branch -d <headRefName>
 ```
 
 Run the second command only for a branch step 2 created. Never pass `--force` or `-D`: when git refuses because of uncommitted or unpushed work, report that and leave it. Done when git has removed what the user approved, or has refused and the refusal is reported.
+
+## Re-review
+
+A re-review checks what changed since the latest review the posting login submitted on this pull request. The **reviewed commit** is that review's `commit.oid` in `gh pr view --json reviews`. Step 2 reuses the worktree step 8 kept and fast-forwards it. Steps 3, 4, and 6 change:
+
+- **Step 3:** after reading as usual, read the **new commits**: `git log <reviewed commit>..HEAD` and `git diff <reviewed commit> HEAD`. A merge of the base among them brings in changes that are not the author's; read those as context. Map each point raised on the pull request, by you or anyone else, to the commit that fixes it, and check that the fix holds. From the earlier review's body, list each reason its verdict held back from Approve: a Blocking finding, a blocking Question, a failed or skipped check, or a part skimmed or unassessed. Done when each raised point and each reason has an outcome on the new head.
+- **Step 4:** the new commits are the change under review, so the brief file's diff command prints them; the full diff is context. Launch only the areas the new commits touch. The checks sub agent reads CI on the new head, runs what the new commits affect, and tries again each skip the earlier review gave, such as a browser test or a workflow that did not run. Step 5 votes on the new findings only.
+- **Step 6:** the summary opens with the earlier points still open, then says in a line which ones the new commits settle. Inline comments cover the new findings; an earlier point still open goes in the summary, or in a reply to its thread (step 7) when the user asks. Recommend the verdict by the usual rules, over the open points and the new findings. A reason the earlier verdict held back that step 3 settled no longer counts.
