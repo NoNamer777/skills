@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.8] - 2026-11-27
+
+### Changed
+
+- `code-review` searches the repositories that consume a changed rule, contract, or shared config, and reports where the old rule survives or overrides the change.
+- `code-review` covers a change of under about 50 lines outside shipped code with one reviewer, and hands each question, including one the description asks reviewers, to a single area.
+- `code-review` rates a goal the description states but the change only partly meets as a Suggestion when no issue is linked.
+
+### Fixed
+
+- `code-review` lists a skip of a check the repository does not have for you only, outside the posted summary.
+- `code-review` keeps or offers to remove its worktree by the recommended verdict, not by the `COMMENT` event it posts on your own pull request.
+
 ## [0.3.7] - 2026-11-27
 
 ### Changed
@@ -111,7 +124,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.7...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.8...HEAD
+[0.3.8]: https://github.com/NoNamer777/skills/releases/tag/v0.3.8
 [0.3.7]: https://github.com/NoNamer777/skills/releases/tag/v0.3.7
 [0.3.6]: https://github.com/NoNamer777/skills/releases/tag/v0.3.6
 [0.3.5]: https://github.com/NoNamer777/skills/releases/tag/v0.3.5
