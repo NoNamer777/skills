@@ -6,6 +6,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.6] - 2026-11-27
+
+### Changed
+
+- `code-review` runs a finding's third voter on the session's model, so the stronger model settles a contested vote, as does every voter on a claim of a security hole, data loss, or a broken migration. The first two voters run one model tier below the session's, and no smaller than `sonnet`.
+
 ## [0.3.5] - 2026-11-27
 
 ### Added
@@ -92,7 +98,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.5...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.6...HEAD
+[0.3.6]: https://github.com/NoNamer777/skills/releases/tag/v0.3.6
 [0.3.5]: https://github.com/NoNamer777/skills/releases/tag/v0.3.5
 [0.3.4]: https://github.com/NoNamer777/skills/releases/tag/v0.3.4
 [0.3.3]: https://github.com/NoNamer777/skills/releases/tag/v0.3.3
