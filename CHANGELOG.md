@@ -6,6 +6,28 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.5] - 2026-11-27
+
+### Added
+
+- `code-review` lists the unresolved review threads whose fix holds, and resolves the ones you approve after the post.
+
+### Changed
+
+- `code-review` runs one combined reviewer beside the checks on a small re-review: one whose new commits only address earlier points, or change under about 100 lines outside shipped code.
+- `code-review` counts a linked issue's criterion as missed only when no pull request in the stack meets it, and rates a gap the pull request declares itself as a Suggestion.
+- `code-review` checks the factual claims in the author's replies, not only the fixes.
+- `code-review` writes a fix in prose where a `suggestion` block would break a formatter's alignment, such as a padded Markdown table.
+
+### Fixed
+
+- `code-review` keeps reviewers and voters read-only in the checkout: only the checks sub agent builds and tests there, reviewers leave measurements that need the build to the voters, tool daemons stay off, and the main agent fetches the stack's branches.
+- `code-review` resolves the pinned toolchain once and hands it to every sub agent.
+- `code-review` gives each sub agent a new browser tab and a port of its own, and stops the processes a review leaves running.
+- `code-review` offers a reset when a force-push leaves the local branch diverged with only stale copies of the pull request's commits.
+- `code-review` re-reviews a rebased pull request by matching the reviewed commit on the new head, instead of diffing across the rebase.
+- `code-review` measures a width as a media query sees it, and measures a proposed fix under its finding's conditions.
+
 ## [0.3.4] - 2026-11-27
 
 ### Added
@@ -70,7 +92,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.4...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.5...HEAD
+[0.3.5]: https://github.com/NoNamer777/skills/releases/tag/v0.3.5
 [0.3.4]: https://github.com/NoNamer777/skills/releases/tag/v0.3.4
 [0.3.3]: https://github.com/NoNamer777/skills/releases/tag/v0.3.3
 [0.3.2]: https://github.com/NoNamer777/skills/releases/tag/v0.3.2
