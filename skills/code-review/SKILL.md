@@ -73,9 +73,15 @@ For a pull request, also read its description, the issues in `closingIssuesRefer
 ```bash
 gh pr view <number> -R <owner>/<repo> --json reviews,comments
 gh api repos/<owner>/<repo>/pulls/<number>/comments --paginate
+gh api graphql -F owner=<owner> -F repo=<repo> -F number=<number> -f query='
+  query($owner: String!, $repo: String!, $number: Int!) {
+    repository(owner: $owner, name: $repo) { pullRequest(number: $number) {
+      reviewThreads(first: 100) { nodes { id isResolved isOutdated path comments(first: 1) { nodes { databaseId } } } }
+    } }
+  }'
 ```
 
-The second command returns the inline comments; a reply carries the `in_reply_to_id` of the comment it answers. Done when you hold every point already raised, each with its outcome: fixed (with its commit), declined (with the reason), or open. A reviewer raises such a point again only when it is still open or its fix does not hold.
+The second command returns the inline comments; a reply carries the `in_reply_to_id` of the comment it answers. The third returns what REST lacks: whether each thread is resolved, with its first comment's `databaseId`, which is that inline comment's `id`. A resolved thread still needs its fix checked in the code. A list with nothing in it can come back null, so guard a jq filter over one with `// []`, as in `.comments // []`. Done when you hold every point already raised, each with its outcome: fixed (with its commit), declined (with the reason), or open. A reviewer raises such a point again only when it is still open or its fix does not hold.
 
 A pull request is **stacked** when its base branch is not the repository's default branch (`gh repo view -R <owner>/<repo> --json defaultBranchRef`), or when an open pull request is based on its head branch. Walk the stack both ways:
 
@@ -192,7 +198,14 @@ The file holds `commit_id` (`headRefOid`), `event`, `body`, and `comments`, each
 
 On the user's own pull request, GitHub rejects `APPROVE` and `REQUEST_CHANGES`, so submit `COMMENT` and say that the verdict stays advice.
 
-Switch back to the user's account right after the post, whether it succeeded or not. Done when the review is posted and the user's account is active again. Report the review's URL.
+When the user asks, also reply to a thread or resolve it, from the same account, each reply approved as a draft first. Reply to a thread's first comment, and resolve a thread by its `id` from step 3:
+
+```bash
+gh api repos/<owner>/<repo>/pulls/<number>/comments/<comment id>/replies -f body=<text>
+gh api graphql -f id=<thread id> -f query='mutation($id: ID!) { resolveReviewThread(input: { threadId: $id }) { thread { isResolved } } }'
+```
+
+Switch back to the user's account right after the post and any replies, whether they succeeded or not. Done when the review is posted and the user's account is active again. Report the review's URL.
 
 ## 8. Offer to clean up
 
