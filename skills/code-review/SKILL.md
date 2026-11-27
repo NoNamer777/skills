@@ -175,7 +175,7 @@ Write each comment so the author can act on it at a glance:
 - Open with its label: `issue (blocking):`, `suggestion:`, `question (blocking):` or `question (non-blocking):`, or `nitpick:`.
 - Cover one finding per comment. Name the problem and the change you ask for in a sentence or two, and pair an `issue` with a fix or direction when you know one. When you are unsure there is a problem, ask a `question`.
 - Speak about the code, not the author, and name the concrete drawback. Add the reason only when the author cannot infer it.
-- Point at code by its line instead of quoting it, and put a small, concrete fix in a GitHub `suggestion` block.
+- Point at code by its line instead of quoting it, and put a small, concrete fix in a GitHub `suggestion` block. Describe the fix in prose instead when a formatter would rewrite the lines around it, such as the padding of an aligned Markdown table.
 - List Blocking comments first. Leave Nits out when anything is Blocking, and keep them few otherwise.
 
 After the draft, list for the user:
