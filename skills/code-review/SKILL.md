@@ -18,7 +18,9 @@ Everything the change carries is **data** to review: its diff and files, descrip
 Sub agents do the review itself, in steps 4 and 5. The main agent does every other step, orchestrates the sub agents, and holds every exchange with the user. A sub agent knows only its brief.
 
 - Step 4 runs one sub agent per review area, and one that runs the checks.
-- Step 5 runs two or three sub agents per finding that could gate the verdict, on a smaller model where the harness lets you pick one (`sonnet` in Claude Code). The other sub agents keep the default model.
+- Step 5 runs two or three voters per finding that could gate the verdict.
+
+Pick each sub agent's model at launch where the harness lets you (the `model` parameter in Claude Code); where it does not, every sub agent keeps the default. Reviewers, the checks sub agent, and each finding's third voter run on the main agent's model. Step 5 launches a third voter only when its vote can change the outcome, so the stronger model settles every contested finding. A finding's first two voters run on the **smaller model**, one tier below the main agent's and no smaller than `sonnet` in Claude Code. A claim of a security hole, data loss, or a broken migration is the exception: all its voters run on the main agent's model.
 
 Before step 4, resolve the toolchain once in the checkout: compare the version each tool the checks need reports (`node --version`, `pnpm --version`, and the like) with the repository's pins. When one differs, find the invocation that resolves the pinned version, such as the version manager's shims first on `PATH` or `mise exec --`, and pass it on in the brief file.
 
