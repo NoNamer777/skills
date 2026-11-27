@@ -6,6 +6,24 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.4] - 2026-11-27
+
+### Added
+
+- `code-review` re-reviews a pull request you reviewed before: it reviews only the new commits, maps each point raised to the commit that fixes it, and revisits what held the earlier verdict back from Approve.
+- `code-review` can reply to a review thread or resolve it when you ask.
+
+### Changed
+
+- `code-review` tests a change on the pull request's preview deployment, in your own signed-in browser, when it has one, and runs it locally only when it has none.
+- `code-review` lists the workflows that did not run on the pull request's head, such as one that waits for a label, and offers to start them.
+- `code-review` keeps its worktree after a verdict of Request changes or Comment, for the re-review, and offers to remove it once the verdict is Approve or the pull request closes.
+
+### Fixed
+
+- `code-review` handles a push that lands mid-review: it settles its findings against the new commits and drafts for the new head, instead of stopping at the post.
+- `code-review` reads which review threads are resolved, which GitHub's REST API does not return.
+
 ## [0.3.3] - 2026-11-26
 
 ### Security
@@ -52,7 +70,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.3...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.4...HEAD
+[0.3.4]: https://github.com/NoNamer777/skills/releases/tag/v0.3.4
 [0.3.3]: https://github.com/NoNamer777/skills/releases/tag/v0.3.3
 [0.3.2]: https://github.com/NoNamer777/skills/releases/tag/v0.3.2
 [0.3.1]: https://github.com/NoNamer777/skills/releases/tag/v0.3.1
