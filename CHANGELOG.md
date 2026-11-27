@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-11-27
+
+### Changed
+
+- `code-review` checks up front that the design files, tracker pages, and preview sign-ins the change names are reachable, and asks you once for what is not.
+
+### Fixed
+
+- `code-review` runs tests in the single-run form CI uses, with `CI=true`, and each sub agent confirms it leaves no process running.
+- `code-review` settles a fact that decides a finding's level before the vote, and rates a gap in otherwise meaningful tests as a Suggestion.
+- `code-review` sends brief corrections to running sub agents, restores tracked files a check rewrites, and installs a missing pinned tool version.
+- `code-review` keeps returns short: one line per question settled without a finding.
+
 ## [0.3.6] - 2026-11-27
 
 ### Changed
@@ -98,7 +111,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.6...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.7...HEAD
+[0.3.7]: https://github.com/NoNamer777/skills/releases/tag/v0.3.7
 [0.3.6]: https://github.com/NoNamer777/skills/releases/tag/v0.3.6
 [0.3.5]: https://github.com/NoNamer777/skills/releases/tag/v0.3.5
 [0.3.4]: https://github.com/NoNamer777/skills/releases/tag/v0.3.4
