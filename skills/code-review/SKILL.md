@@ -158,6 +158,8 @@ Keep each dropped finding's claim and `path:line` for step 6. Done when every vo
 
 ## 6. Present the review
 
+For a pull request, first read `headRefOid` again. When it moved past the commit the sub agents reviewed, say so, fast-forward the checkout, and read `git diff <old head> <headRefOid>`. Settle each finding and check result against that diff: one whose lines and inputs the new commits leave alone stands, and you check each other one against the new code, dropping it when the new commits fix it. A check whose inputs they change takes its CI result on the new head, or runs again. Review what the new commits add beyond those fixes as a [re-review](#re-review) does. Done when every `path:line` is anchored on the latest `headRefOid` and the draft is for that commit.
+
 Recommend one verdict for a pull request, from the findings that survived:
 
 - **Request changes** when any finding is Blocking.
@@ -190,7 +192,7 @@ Ask the user which comments to post and which verdict to use. They may approve a
 
 Skip this step for local changes.
 
-Check that the pull request's head still equals `headRefOid`; when it moved, say so and stop, since the drafted lines may no longer match. Otherwise switch to the review account when step 1 names one, and submit the approved comments as one review, built in a file outside the repository so the body survives any shell's quoting:
+Check that the pull request's head still equals the commit the draft is for; when it moved, say so, run step 6's head check, and present the draft again. Otherwise switch to the review account when step 1 names one, and submit the approved comments as one review, built in a file outside the repository so the body survives any shell's quoting:
 
 ```bash
 gh api repos/<owner>/<repo>/pulls/<number>/reviews --input <file>
