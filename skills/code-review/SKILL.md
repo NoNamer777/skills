@@ -83,7 +83,7 @@ gh api graphql -F owner=<owner> -F repo=<repo> -F number=<number> -f query='
   }'
 ```
 
-The second command returns the inline comments; a reply carries the `in_reply_to_id` of the comment it answers. The third returns what REST lacks: whether each thread is resolved, with its first comment's `databaseId`, which is that inline comment's `id`. A resolved thread still needs its fix checked in the code. A list with nothing in it can come back null, so guard a jq filter over one with `// []`, as in `.comments // []`. Done when you hold every point already raised, each with its outcome: fixed (with its commit), declined (with the reason), or open. A reviewer raises such a point again only when it is still open or its fix does not hold.
+The second command returns the inline comments; a reply carries the `in_reply_to_id` of the comment it answers. The third returns what REST lacks: whether each thread is resolved, with its first comment's `databaseId`, which is that inline comment's `id`. A resolved thread still needs its fix checked in the code. A factual claim in a reply, such as why the code compiles or that a case cannot occur, needs the same check: a point declined or answered on a false claim stays open. A list with nothing in it can come back null, so guard a jq filter over one with `// []`, as in `.comments // []`. Done when you hold every point already raised, each with its outcome: fixed (with its commit), declined (with the reason), or open. A reviewer raises such a point again only when it is still open or its fix does not hold.
 
 When the login that will post (step 1) has reviewed this pull request before, the run is a **re-review**: steps 3, 4, and 6 change as [Re-review](#re-review) describes.
 
