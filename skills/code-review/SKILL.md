@@ -213,7 +213,7 @@ Switch back to the user's account right after the post and any replies, whether 
 
 ## 8. Offer to clean up
 
-Skip this step when step 2 created nothing. Once the review is posted, or when the user decides to post nothing, offer to remove what step 2 created, naming the worktree path and the branch, and wait for the answer. The user may keep them to re-review after the author pushes.
+Skip this step when step 2 created nothing. Keep what step 2 created while a re-review may follow: after a verdict of Request changes or Comment, name the worktree path and the branch, say you keep them for the re-review, and remove them only when the user asks. Once the verdict is Approve, the pull request merges or closes, or the user decides to post nothing, offer to remove them, naming the path and the branch, and wait for the answer.
 
 On a yes, run from the original checkout, since a worktree cannot remove the folder you stand in:
 
