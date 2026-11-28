@@ -6,14 +6,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.11] - 2026-11-28
+
 ### Changed
 
+- `addressing-pr-comments` fetches the pull request fresh on every run, even one it handled earlier in the session.
+- `addressing-pr-comments` lets a Fix edit the pull request's title or description, or a linked issue, and drafts that edit with the advice.
+- `addressing-pr-comments` treats a review or thread you started on your own pull request as a self-review: it advises on it and drafts no reply or reaction unless you ask.
+- `addressing-pr-comments` lists the other places a flagged pattern occurs, so you can bring them into scope or into a follow-up.
+- `addressing-pr-comments` drafts every field a follow-up issue gets, such as its type, labels, and project fields, not only its title and body.
+- `addressing-pr-comments` requests another review from each reviewer whose Fix landed, as the advice plans, instead of asking afterward.
+- `addressing-pr-comments` adds no `Co-authored-by` trailer for an account the agent instructions name as an agent review account.
 - `code-review` maps each check to the CI job and step that runs it, counts a step inside a job that passed as passed, and keeps the map for later rounds.
 - `code-review` records why each Suggestion or Nit was left out of the draft.
 - `code-review` counts an outside source as reachable when a connected tool, such as an MCP server, can open it, and lets the sub agents use that tool read-only.
 
 ### Fixed
 
+- `addressing-pr-comments` links each review summary by the URL GitHub returns for it, so the links no longer break.
+- `addressing-pr-comments` reads paginated query output through a pipe, since `gh` rejects `--jq` together with `--slurp`.
 - `code-review` reads the pull request's state and fetches its base before cleaning up, so it no longer reports a merged pull request as open or misreads a stale local base as an unmerged branch.
 
 ## [0.3.10] - 2026-11-28
@@ -162,7 +173,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.10...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.11...HEAD
+[0.3.11]: https://github.com/NoNamer777/skills/releases/tag/v0.3.11
 [0.3.10]: https://github.com/NoNamer777/skills/releases/tag/v0.3.10
 [0.3.9]: https://github.com/NoNamer777/skills/releases/tag/v0.3.9
 [0.3.8]: https://github.com/NoNamer777/skills/releases/tag/v0.3.8
