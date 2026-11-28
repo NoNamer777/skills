@@ -6,6 +6,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+### Changed
+
+- `code-review` maps each check to the CI job and step that runs it, counts a step inside a job that passed as passed, and keeps the map for later rounds.
+- `code-review` records why each Suggestion or Nit was left out of the draft.
+- `code-review` counts an outside source as reachable when a connected tool, such as an MCP server, can open it, and lets the sub agents use that tool read-only.
+
+### Fixed
+
+- `code-review` reads the pull request's state and fetches its base before cleaning up, so it no longer reports a merged pull request as open or misreads a stale local base as an unmerged branch.
+
 ## [0.3.10] - 2026-11-28
 
 ### Changed
