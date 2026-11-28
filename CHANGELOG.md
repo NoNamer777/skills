@@ -6,6 +6,19 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.10] - 2026-11-28
+
+### Changed
+
+- `code-review` keeps a state file per pull request across review rounds, so a re-review reuses the earlier toolchain, outcomes, measurements, and held-back Suggestions and Nits.
+- `code-review` checks a re-review that only applies its own suggestion blocks itself, and starts the checks sub agent only to repeat an earlier measurement.
+- `code-review` offers held-back Suggestions and Nits once, and takes the user's answer as final.
+- `code-review` measures a Storybook story at the viewport its parameters set, or reports the scrollbar a short window adds.
+
+### Fixed
+
+- `code-review` keeps the brief file alone in its folder and settled vote outcomes in the state file, so a voter can no longer read the tally.
+
 ## [0.3.9] - 2026-11-28
 
 ### Changed
@@ -139,7 +152,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.9...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.10...HEAD
+[0.3.10]: https://github.com/NoNamer777/skills/releases/tag/v0.3.10
 [0.3.9]: https://github.com/NoNamer777/skills/releases/tag/v0.3.9
 [0.3.8]: https://github.com/NoNamer777/skills/releases/tag/v0.3.8
 [0.3.7]: https://github.com/NoNamer777/skills/releases/tag/v0.3.7
