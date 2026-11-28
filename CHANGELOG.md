@@ -6,6 +6,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 ## [Unreleased]
 
+## [0.3.9] - 2026-11-28
+
+### Changed
+
+- `code-review` lists every place that names what a suggested rename or move changes, such as the description, the title, and READMEs.
+- `code-review` rates a description wrong only in names or pointers as a Suggestion; only a contradiction of shipped behavior makes it Blocking.
+- `code-review` settles a re-review without new commits itself, with no sub agents, and reads the CI those edits ran again.
+- `code-review` compares the build output at base and head for a change that claims no behavior change, and tests in the browser only what differs.
+- `code-review` covers a small change with no logic with one reviewer.
+- `code-review` offers again, once a re-review can approve, the Suggestions and Nits an earlier round held back for a Blocking finding.
+
+### Fixed
+
+- `code-review` sub agents set `CI=true` for every command, servers included, so a task runner no longer installs dependencies and rewrites the lockfile.
+
 ## [0.3.8] - 2026-11-27
 
 ### Changed
@@ -124,7 +139,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 
 - `addressing-pr-comments` skill: triages the open review feedback on a GitHub pull request you authored, then fixes, commits, and replies to what you approve.
 
-[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.8...HEAD
+[unreleased]: https://github.com/NoNamer777/skills/compare/v0.3.9...HEAD
+[0.3.9]: https://github.com/NoNamer777/skills/releases/tag/v0.3.9
 [0.3.8]: https://github.com/NoNamer777/skills/releases/tag/v0.3.8
 [0.3.7]: https://github.com/NoNamer777/skills/releases/tag/v0.3.7
 [0.3.6]: https://github.com/NoNamer777/skills/releases/tag/v0.3.6
